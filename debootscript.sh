@@ -79,6 +79,7 @@ if [[ $UID != 0 ]]; then
   echo 'You must be root to run this'
   exit 1
 fi
+apt-get install fdisk lvm2 git debootstrap dosfstools -y 
 
 for command in mkfs.ext4 debootstrap ip; do
   if ! command -v $command &> /dev/null; then
@@ -87,7 +88,6 @@ for command in mkfs.ext4 debootstrap ip; do
   fi
 done
 
-apt-get install fdisk lvm2 git debootstrap dosfstools -y 
 # Check necessary parameters
 
 if [[ -z $root_device ]]; then
