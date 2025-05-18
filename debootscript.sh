@@ -143,7 +143,8 @@ fi
 ###
 
 root_partition_prefix=${root_device}
-if [[ "${root_device}" ~= "nvme" ]]; then 
+grep -q -e "nvme" "${root_device}"
+if [ $? -eq 0 ]; then 
   root_partition_prefix="${root_device}p"
 fi
 
