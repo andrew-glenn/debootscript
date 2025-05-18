@@ -87,6 +87,7 @@ for command in mkfs.ext4 debootstrap ip; do
   fi
 done
 
+apt-get install fdisk lvm2 git debootstrap dosfstools -y 
 # Check necessary parameters
 
 if [[ -z $root_device ]]; then
