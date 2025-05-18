@@ -138,6 +138,15 @@ if [[ ! -v ssh_public_key && ! -v target_password ]]; then
   exit 1
 fi
 
+###
+# Prepre env vars
+###
+
+root_partition_prefix=${root_device}
+if [[ "${root_device}" ~= "nvme" ]]; then 
+  root_partition_prefix="${root_device}p"
+fi
+
 ###########
 # Install #
 ###########
@@ -177,23 +186,23 @@ fi
 
 # LVM
 if [[ -v use_lvm ]]; then
-  pvcreate "${root_device}"2
-  vgcreate root_vg "${root_device}"2
+  pvcreate "${root_partition_prefix}"2
+  vgcreate root_vg "${root_partition_prefix}"2
   lvcreate -y -L 1G -n root_lv root_vg
 fi
 
 # Create filesystems
 if [[ $partition_type = gpt ]]; then
-  mkfs.fat -F32 "$root_device"1
+  mkfs.fat -F32 "${root_partition_prefix}"1
 else
-  mkfs.ext2 -m 1 "${root_device}"1
+  mkfs.ext2 -m 1 "${root_partition_prefix}"1
 fi
 if [[ -v use_lvm ]]; then
   mkfs.ext4 -m 1 /dev/mapper/root_vg-root_lv
   root_uuid=$(blkid -o export /dev/mapper/root_vg-root_lv | grep -E '^UUID=')
 else
-  mkfs.ext4 -m 1 "${root_device}"2
-  root_uuid=$(blkid -o export "${root_device}"2 | grep -E '^UUID=')
+  mkfs.ext4 -m 1 "${root_partition_prefix}"2
+  root_uuid=$(blkid -o export "${root_partition_prefix}"2 | grep -E '^UUID=')
 fi
 
 # Mount filesystems
@@ -201,15 +210,15 @@ mkdir /target
 if [[ -v use_lvm ]]; then
   mount /dev/mapper/root_vg-root_lv /target
 else
-  mount "${root_device}"2 /target
+  mount "${root_partition_prefix}"2 /target
 fi
 if [[ $partition_type = gpt ]]; then
   mkdir -p /target/boot/efi
-  mount "${root_device}"1 /target/boot/efi
+  mount "${root_partition_prefix}"1 /target/boot/efi
   echo "fs0:\vmlinuz root=${root_uuid} initrd=initrd.img" > /target/boot/efi/startup.nsh
 else
   mkdir /target/boot
-  mount "${root_device}"1 /target/boot
+  mount "${root_partition_prefix}"1 /target/boot
 fi
 
 # Debootstrap and chroot preparations
