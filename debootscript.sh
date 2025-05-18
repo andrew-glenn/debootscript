@@ -193,6 +193,7 @@ fi
 
 # LVM
 if [[ -v use_lvm ]]; then
+  exit
   pvcreate "${root_partition_prefix}"2
   vgcreate root_vg "${root_partition_prefix}"2
   lvcreate -y -L 1G -n root_lv root_vg
