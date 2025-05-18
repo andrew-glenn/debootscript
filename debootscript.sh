@@ -149,12 +149,17 @@ if [ $? -eq 0 ]; then
   root_partition_prefix="${root_device}p"
 fi
 
+
+function wait(){
+  read -n 1 -s -r -p "Press any key to continue..."
+}
+
 ###########
 # Install #
 ###########
 
 # Create partitions
-sfdisk --dump "${root_device}" || true
+sfdisk --delete "${root_device}" || true
 
 if [[ $partition_type = gpt ]]; then
 
@@ -222,7 +227,7 @@ else
   mkdir /target/boot
   mount "${root_partition_prefix}"1 /target/boot
 fi
-
+wait 
 # Debootstrap and chroot preparations
 if [[ $distro = ubuntu ]]; then
   if [[ ! -v mirror ]]; then
